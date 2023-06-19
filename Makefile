@@ -24,7 +24,7 @@ LDFLAGS += $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) $(PKGCONF) --libs libdpdk)
 
 build/$(APP): $(SRCS-y)
 	mkdir -p build
-	gcc $(CFLAGS) $(SRCS-y) -o $@ $(LDFLAGS)
+	gcc $(CFLAGS) $(SRCS-y) -o $@ $(LDFLAGS) -Wl,-rpath=$(RTE_SDK)/build/install/lib/x86_64-linux-gnu
 
 clean:
 	rm -rf build/
