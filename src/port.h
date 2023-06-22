@@ -38,7 +38,7 @@
 #define RX_BURST_MAX        NB_RXD
 #define TX_QUEUE_SIZE       NB_TXD
 
-#define TX_BURST_MAX        512
+#define TX_BURST_MAX        1024
 #define TX_BURST_DEFAULT    8
 
 #define BOND_SLAVE_MAX      4
