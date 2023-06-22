@@ -81,7 +81,7 @@
 #define VLAN_ID_MAX         4094
 
 #define PIPELINE_MIN        0
-#define PIPELINE_MAX        100
+#define PIPELINE_MAX        2048
 #define PIPELINE_DEFAULT    0
 
 struct config {

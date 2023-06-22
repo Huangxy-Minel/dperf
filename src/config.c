@@ -2361,6 +2361,7 @@ uint32_t config_get_total_socket_num(struct config *cfg, int id)
          * the DUT(eg load balancer) may connect to all servers
          * */
         for_each_ip_range(&cfg->client_ip_group, client_ip_range) {
+            // printf("DEBUG: client_ip_range->num:%d\n", client_ip_range->num);
             num += config_client_ip_range_socket_num(cfg, client_ip_range);
         }
     } else {
