@@ -39,9 +39,9 @@
 #define TX_QUEUE_SIZE       NB_TXD
 
 #define TX_BURST_MAX        1024
-#define TX_BURST_DEFAULT    8
+#define TX_BURST_DEFAULT    16
 
-#define BOND_SLAVE_MAX      4
+#define BOND_SLAVE_MAX      16
 #define PCI_NUM_MAX         BOND_SLAVE_MAX
 #define BOND_NAME_MAX       32
 #define BOND_WAIT_SEC       16
