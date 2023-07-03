@@ -228,6 +228,7 @@ static int port_init_port_id(struct netif_port *port)
 
 static int port_init(struct netif_port *port)
 {
+    // printf("ID: %d; Queue num: %d; PCIe num: %d \n", port->id, port->queue_num, port->pci_num);
     if (port_init_port_id(port) < 0) {
         return -1;
     }
