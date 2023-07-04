@@ -32,14 +32,14 @@
 #define NETIF_PORT_MAX      2
 #define PCI_LEN             12
 
-#define NB_RXD              4096
-#define NB_TXD              4096
+#define NB_RXD              2048
+#define NB_TXD              2048
 
 #define RX_BURST_MAX        NB_RXD
 #define TX_QUEUE_SIZE       NB_TXD
 
 #define TX_BURST_MAX        1024
-#define TX_BURST_DEFAULT    128
+#define TX_BURST_DEFAULT    32
 
 #define BOND_SLAVE_MAX      16
 #define PCI_NUM_MAX         BOND_SLAVE_MAX
