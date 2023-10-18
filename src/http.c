@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2021-2022 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2022-2023 Jianzhang Peng. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
  * limitations under the License.
  *
  * Author: Jianzhang Peng (pengjianzhang@baidu.com)
+ *         Jianzhang Peng (pengjianzhang@gmail.com)
  */
 
 #include "http.h"
@@ -38,12 +40,12 @@
     "P: aa\r\n"                 \
     "\r\n"
 
+/* don't change */
 #define HTTP_RSP_FORMAT         \
-    "HTTP/1.1 200 OK\n"         \
-    "Serv:dperf\n"              \
-    "Content-Length:%4d\n"      \
-    "Connection:keep-alive\n"   \
-    "\n"                        \
+    "HTTP/1.1 200 OK\r\n"       \
+    "Content-Length:%11d\r\n"  \
+    "Connection:keep-alive\r\n" \
+    "\r\n"                      \
     "%s"
 
 static char http_rsp[MBUF_DATA_SIZE];
@@ -82,6 +84,7 @@ static void http_set_payload_client(struct config *cfg, char *dest, int len, int
 static void http_set_payload_server(struct config *cfg, char *dest, int len, int payload_size)
 {
     int pad = 0;
+    int content_length = 0;
     char buf[MBUF_DATA_SIZE] = {0};
     const char *data = NULL;
 
@@ -91,16 +94,25 @@ static void http_set_payload_server(struct config *cfg, char *dest, int len, int
     } else if (payload_size < HTTP_DATA_MIN_SIZE) {
         config_set_payload(cfg, dest, payload_size, 1);
     } else {
-        pad = payload_size - HTTP_DATA_MIN_SIZE;
+        if (payload_size > cfg->mss) {
+            pad = cfg->mss - HTTP_DATA_MIN_SIZE;
+        } else {
+            pad = payload_size - HTTP_DATA_MIN_SIZE;
+        }
+
+        content_length = payload_size - HTTP_DATA_MIN_SIZE;
         if (pad > 0) {
             config_set_payload(cfg, buf, pad, 1);
         }
-        snprintf(dest, len, HTTP_RSP_FORMAT, (int)strlen(buf), buf);
+        snprintf(dest, len, HTTP_RSP_FORMAT, content_length, buf);
     }
 }
 
 void http_set_payload(struct config *cfg, int payload_size)
 {
-    http_set_payload_server(cfg, http_rsp, MBUF_DATA_SIZE, payload_size);
-    http_set_payload_client(cfg, http_req, MBUF_DATA_SIZE, payload_size);
+    if (cfg->server) {
+        http_set_payload_server(cfg, http_rsp, MBUF_DATA_SIZE, payload_size);
+    } else {
+        http_set_payload_client(cfg, http_req, MBUF_DATA_SIZE, payload_size);
+    }
 }

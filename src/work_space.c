@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2021-2022 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2022-2023 Jianzhang Peng. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
  * limitations under the License.
  *
  * Author: Jianzhang Peng (pengjianzhang@baidu.com)
+ *         Jianzhang Peng (pengjianzhang@gmail.com)
  */
 
 #include "work_space.h"
@@ -198,6 +200,7 @@ struct work_space *work_space_new(struct config *cfg, int id)
     ws->ipv6 = cfg->af == AF_INET6;
     ws->http = cfg->http;
     ws->flood = cfg->flood;
+    ws->send_window = (uint32_t)cfg->mss * (uint32_t)cfg->send_window;
     ws->cfg = cfg;
     ws->tos = cfg->tos;
     ws->tx_queue.tx_burst = cfg->tx_burst;

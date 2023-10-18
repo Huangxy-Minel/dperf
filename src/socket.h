@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2021-2022 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2022-2023 Jianzhang Peng. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
  * limitations under the License.
  *
  * Author: Jianzhang Peng (pengjianzhang@baidu.com)
+ *         Jianzhang Peng (pengjianzhang@gmail.com)
  */
 
 #ifndef __SOCKET_H
@@ -27,7 +29,7 @@
 
 enum {
     SK_CLOSED,
-    SK_LISTEN,          /* disable a socket, client only */
+    SK_LISTEN,
     SK_SYN_SENT,        /* also UDP client send */
     SK_SYN_RECEIVED,    /* also UDP client recv */
     SK_ESTABLISHED,
@@ -93,6 +95,8 @@ struct socket {
     uint8_t http_parse_state;
     uint8_t http_flags;
     uint8_t http_ack;
+    uint8_t snd_window;
+    uint32_t snd_max;
 #endif
 };
 
@@ -108,9 +112,13 @@ struct socket_pool {
 
 struct socket_table {
     uint32_t server_ip;
-    uint16_t port_num;
-    uint16_t port_min;
-    uint16_t port_max;
+    uint16_t server_port_num;
+    uint16_t server_port_min;
+    uint16_t server_port_max;
+
+    uint16_t client_port_num;
+    uint16_t client_port_min;
+    uint16_t client_port_max;
 
     uint8_t client_hop;
     uint8_t rss;
@@ -174,7 +182,7 @@ static inline struct socket *socekt_table_get_socket_rss(struct socket_table *st
             }
             continue;
         } else {
-            sp->next += NETWORK_PORT_NUM * st->port_num - st->port_num;
+            sp->next += st->client_port_num * st->server_port_num;
             if (sp->next >= sp->num) {
                 sp->next = 0;
             }
@@ -201,10 +209,6 @@ retry:
         sk = socekt_table_get_socket_rss(st);
     }
 
-    if (unlikely(sk->state == SK_LISTEN)) {
-        goto retry;
-    }
-
     if (st->client_hop) {
         sp->next += 65535;
         if (sp->next >= sp->num) {
@@ -220,7 +224,7 @@ static inline struct socket *socket_port_table_get(const struct socket_table *st
 {
     uint32_t idx = 0;
 
-    idx = (client_port_host - 1) * st->port_num + server_port_host - st->port_min;
+    idx = (client_port_host - st->client_port_min) * st->server_port_num + server_port_host - st->server_port_min;
     return &t->sockets[idx];
 }
 
@@ -233,7 +237,8 @@ static inline struct socket *socket_common_lookup(const struct socket_table *st,
     uint16_t server_port_host = ntohs(server_port);
 
     if (likely(t != NULL)  && (server_ip == st->server_ip) && (client_port != 0) &&
-        (server_port_host >= st->port_min) && (server_port_host <= st->port_max)) {
+        (client_port_host >= st->client_port_min) && (client_port_host <= st->client_port_max) &&
+        (server_port_host >= st->server_port_min) && (server_port_host <= st->server_port_max)) {
         return socket_port_table_get(st, t, client_port_host, server_port_host);
     }
 
@@ -332,6 +337,7 @@ static inline void socket_close(struct socket *sk)
 {
     if (sk->state != SK_CLOSED) {
         sk->state = SK_CLOSED;
+        sk->rcv_nxt = 0;
         socket_node_del(&sk->node);
         net_stats_socket_close();
     }
@@ -345,8 +351,19 @@ static inline void socket_init_http(struct socket *sk)
     sk->http_flags = 0;
     sk->http_ack = 0;
 }
+
+static inline void socket_init_http_server(struct socket *sk)
+{
+    sk->http_length = 0;
+    sk->http_parse_state = 0;
+    sk->http_flags = 0;
+    sk->http_ack = 0;
+    sk->snd_max = sk->snd_nxt + (uint32_t)g_config.payload_size;
+}
+
 #else
 #define socket_init_http(sk) do{}while(0)
+#define socket_init_http_server(sk) do{}while(0)
 #endif
 
 static inline void socket_server_open(__rte_unused struct socket_table *st, struct socket *sk, struct tcphdr *th)
@@ -361,8 +378,10 @@ static inline void socket_server_open(__rte_unused struct socket_table *st, stru
     sk->log = 0;
 #endif
     sk->retrans = 0;
+    sk->keepalive_request_num = 0;
     sk->snd_nxt++;
     sk->snd_una = sk->snd_nxt;
+    sk->snd_window = 1;
     sk->rcv_nxt = ntohl(th->th_seq) + 1;
 }
 

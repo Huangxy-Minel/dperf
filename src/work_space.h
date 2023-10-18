@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2021-2022 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2022-2023 Jianzhang Peng. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
  * limitations under the License.
  *
  * Author: Jianzhang Peng (pengjianzhang@baidu.com)
+ *         Jianzhang Peng (pengjianzhang@gmail.com)
  */
 
 #ifndef __WORK_SPACE_H
@@ -67,6 +69,10 @@ struct work_space {
     uint8_t change_dip:1;
     uint8_t http:1;
     uint8_t flood:1;
+
+    /* bytes */
+    uint32_t send_window;
+
     uint8_t tos;
     uint8_t port_id;
     uint8_t queue_id;

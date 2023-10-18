@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2021-2022 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2022-2023 Jianzhang Peng. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
  * limitations under the License.
  *
  * Author: Jianzhang Peng (pengjianzhang@baidu.com)
+ *         Jianzhang Peng (pengjianzhang@gmail.com)
  */
 
 #include "port.h"
@@ -144,9 +146,9 @@ int port_config(struct netif_port *port)
     if (g_config.jumbo) {
 #if RTE_VERSION < RTE_VERSION_NUM(21, 11, 0, 0)
         g_port_conf.rxmode.offloads |= DEV_RX_OFFLOAD_JUMBO_FRAME;
-        g_port_conf.rxmode.max_rx_pkt_len = JUMBO_FRAME_MAX_LEN;
+        g_port_conf.rxmode.max_rx_pkt_len = JUMBO_FRAME_SIZE(g_config.jumbo_mtu);
 #else
-        g_port_conf.rxmode.mtu = JUMBO_MTU;
+        g_port_conf.rxmode.mtu = g_config.jumbo_mtu;
 #endif
     }
 
@@ -200,8 +202,7 @@ static int port_init_port_id(struct netif_port *port)
     for (i = 0; i < port->pci_num; i++) {
         pci = port->pci_list[i];
         if (rte_eth_dev_get_port_by_name(pci, &port_id) != 0) {
-            printf("warning: cannot find port id by pic %s\n", pci);
-        } else {
+            printf("warning: cannot find port id by pci %s\n", pci);
             port_id = (uint16_t)i;
         }
 

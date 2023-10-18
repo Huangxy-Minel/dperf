@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2021-2022 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2022-2023 Jianzhang Peng. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
  * limitations under the License.
  *
  * Author: Jianzhang Peng (pengjianzhang@gmail.com)
+ *         Jianzhang Peng (pengjianzhang@gmail.com)
  */
 
 #include "net_stats.h"
@@ -317,6 +319,7 @@ static int net_stats_print_retransmit(struct net_stats *stats, char *buf, int bu
     char ack_rt[STATS_BUF_LEN];
     char push_rt[STATS_BUF_LEN];
     char tcp_drop[STATS_BUF_LEN];
+    char ack_dup[STATS_BUF_LEN];
 
     char udp_rt[STATS_BUF_LEN];
     char udp_drop[STATS_BUF_LEN];
@@ -329,10 +332,11 @@ static int net_stats_print_retransmit(struct net_stats *stats, char *buf, int bu
         net_stats_format_print_err(stats->fin_rt, fin_rt, STATS_BUF_LEN);
         net_stats_format_print_err(stats->ack_rt, ack_rt, STATS_BUF_LEN);
         net_stats_format_print_err(stats->push_rt, push_rt, STATS_BUF_LEN);
+        net_stats_format_print_err(stats->ack_dup, ack_dup, STATS_BUF_LEN);
 
         SNPRINTF(p, len, "synRt   %s finRt    %s ackRt    %s pushRt  %s\n",
             syn_rt, fin_rt, ack_rt, push_rt);
-        SNPRINTF(p, len, "tcpDrop %s udpDrop  %s\n", tcp_drop, udp_drop);
+        SNPRINTF(p, len, "tcpDrop %s udpDrop  %s ackDup   %s\n", tcp_drop, udp_drop, ack_dup);
     } else {
         net_stats_format_print_err(stats->udp_rt, udp_rt, STATS_BUF_LEN);
         SNPRINTF(p, len, "udpRt   %s udpDrop  %s tcpDrop  %s\n", udp_rt, udp_drop, tcp_drop);

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2021-2022 Baidu.com, Inc. All Rights Reserved.
+ * Copyright (c) 2022-2023 Jianzhang Peng. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +15,7 @@
  * limitations under the License.
  *
  * Author: Jianzhang Peng (pengjianzhang@baidu.com)
+ *         Jianzhang Peng (pengjianzhang@gmail.com)
  */
 
 #ifndef __NET_STATS_H
@@ -60,6 +62,7 @@ struct net_stats {
     uint64_t fin_rt;
     uint64_t ack_rt;
     uint64_t push_rt;
+    uint64_t ack_dup;
 
     uint64_t http_2xx;
     uint64_t tcp_req;
@@ -118,6 +121,7 @@ extern __thread struct net_stats g_net_stats;
 #define net_stats_fin_rt()          do {g_net_stats.fin_rt++;} while (0)
 #define net_stats_ack_rt()          do {g_net_stats.ack_rt++;} while (0)
 #define net_stats_push_rt()         do {g_net_stats.push_rt++;} while (0)
+#define net_stats_ack_dup()          do {g_net_stats.ack_dup++;} while (0)
 
 #define net_stats_pkt_lost()        do {g_net_stats.pkt_lost++;} while (0)
 
