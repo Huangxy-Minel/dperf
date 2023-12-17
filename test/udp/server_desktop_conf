@@ -2,7 +2,7 @@ mode                        server
 protocol                    udp
 
 cpu                         8
-tx_burst                    32
+tx_burst                    128
 # rss                         auto
 # payload_size                18
 packet_size                 64
